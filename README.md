@@ -1,4 +1,4 @@
-# Kestanelik 2040 (demo)
+# Son Şans (demo)
 
 Tarayıcıda çalışan, tepeden bakılan, iklim odaklı hayatta kalma ve köy kurma oyunu. Saf JavaScript + Canvas; kurulum yok.
 

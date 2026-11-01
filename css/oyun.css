@@ -67,3 +67,14 @@ select,input[type=text]{font:inherit;background:#1a252d;color:#e8eef2;border:1px
 .raf button.bos{visibility:hidden}
 #tip{position:fixed;display:none;pointer-events:none;z-index:35;background:rgba(10,15,20,.96);border:1px solid #ff9f43;border-radius:6px;padding:8px 11px;max-width:340px;font-size:15px;line-height:1.4}
 #tip b{color:#ff9f43;display:block}#tip small{color:#9db0bc;display:block;margin-top:3px}
+
+.frag{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(0,0,0,.5);padding:20px}
+.frag>*{opacity:0;animation:fk 1.2s forwards}
+.frag>*:nth-child(2){animation-delay:.8s}.frag>*:nth-child(3){animation-delay:1.6s}
+.frag h1{font-size:84px;letter-spacing:8px;color:#ff9f43;text-shadow:0 4px 24px #000}
+.frag .rol{font-size:22px;color:#9db0bc;letter-spacing:5px;margin-bottom:10px}
+.frag .ad{font-size:48px;font-weight:700;text-shadow:0 3px 18px #000}
+.frag .cum{font-size:30px;line-height:1.5;max-width:900px;text-shadow:0 3px 18px #000}
+.frag .btnler{display:flex;gap:12px;margin-top:26px}
+.frag .atlaipucu{position:absolute;right:16px;bottom:12px;font-size:14px;color:#9db0bc;opacity:1;animation:none}
+@keyframes fk{to{opacity:1}}

@@ -43,13 +43,14 @@ var Hikaye = (function () {
     var h = '<div class="orta"><h1>' + U.esc(D.BASLIK) + '</h1><div class="alt">İklim hayatta kalma ve köy kurma · Kestanelik, 2040</div><div class="alt" style="font-size:14px;margin-top:-8px">GameUP Türkiye Oyun Hackathonu · COP31 odak alanları: enerji, gıda, dirençli şehirler, okyanus, eğitim, sıfır atık</div>';
     h += '<button class="b ana" id="mYeni">Yeni oyun</button>';
     if (Kayit.enYeni()) h += '<button class="b" id="mDevam">Devam et</button>';
-    h += '<button class="b" id="mDosya">Kayıt dosyası yükle</button><button class="b" id="mNasil">Nasıl oynanır</button><button class="b" id="mHak">Hakkında</button></div>';
+    h += '<button class="b" id="mDosya">Kayıt dosyası yükle</button><button class="b" id="mNasil">Nasıl oynanır</button><button class="b" id="mFrag">🎬 Fragman</button><button class="b" id="mHak">Hakkında</button></div>';
     ekran('kapak', h);
     $('mYeni').onclick = yeniOyunForm;
     if ($('mDevam')) $('mDevam').onclick = function () { if (Kayit.yukle(Kayit.enYeni())) Main.oyunaGir(); else UI.toast('Kayıt yüklenemedi.', 'kotu'); };
     $('mDosya').onclick = function () { $('dosya').click(); };
     $('mNasil').onclick = nasilOynanir;
     $('mHak').onclick = hakkinda;
+    $('mFrag').onclick = function () { fragman(anaMenu); };
   }
 
   function nasilOynanir() {
@@ -60,7 +61,7 @@ var Hikaye = (function () {
   }
   function hakkinda() {
     var h = '<h2>Hakkında</h2><p>GameUP Türkiye Oyun Hackathonu 2026 için geliştirilen demo. Tema: iklim değişikliği (COP31 odak alanları: yenilenebilir enerji, iklim dirençli şehirler, gıda güvenliği, okyanuslar, eğitim, sıfır atık, sağlık).</p>';
-    h += '<p><b>Ekip:</b> (eklenecek)</p><p>Görseller ekip tarafından yapay zekâ araçlarıyla üretilmiştir.</p>';
+    h += '<p><b>Oyun tasarımı ve yazılım:</b> Muhammed Can Harmanşah<br><b>Karakter tasarımı:</b> Elif Pınar</p><p>Görseller yapay zekâ araçlarıyla üretilmiştir.</p>';
     h += '<p class="kaynak">Kaynaklar: IPCC AR6, MedECC, Lancet Countdown 2025, WEF Küresel Riskler 2026, Andre vd. 2024 (Nature Climate Change), FAO, UNEP, WHO, IEA, IRENA, AFAD, BM Early Warnings for All, COP31 Başkanlığı.</p>';
     h += '<p class="gri" style="font-size:12px">Bu bir tahmin değil, “hiçbir şey yapılmasaydı” kurgusudur. Tek bir köyün küresel iklimi değiştiremeyeceği, 2°C\'nin gerçekte bir şalter olmadığı açıktır; oyun bunları basitleştirir.</p>';
     h += '<button class="ana" onclick="modalKapatGlobal()">Tamam</button>';
@@ -163,6 +164,7 @@ var Hikaye = (function () {
     Main.oyunaGir();
     var b = opt.bonus || {};
     UI.toast('2040, bahar. Sığınaktan çıktın. Yeşil bir filiz var.', 'iyi');
+    if (G.harita) UI.toast('Harita: ' + G.harita.ad, 'bilgi');
     if (b.kitaplar && b.kitaplar.length) UI.toast('Çantandaki kitaplardan öğrendiklerin: ' + b.kitaplar.map(function (k) { return D.KITAP[k].ad; }).join(', '), 'iyi');
   }
 
@@ -180,10 +182,45 @@ var Hikaye = (function () {
     h += '<p style="margin-top:6px">Genel puan: <b>' + Math.round(ort / kr.length) + '/100</b></p></div>';
     h += '<p style="margin:12px 0;line-height:1.6">Bu oyundaki her çözüm — rüzgâr enerjisi, yağmur suyu toplama, kompost, erken uyarı, ağaçlandırma — bugün var. <b>2040\'ı beklemek zorunda değiliz.</b></p>';
     h += '<div style="text-align:left;font-size:13px"><b style="color:#ff9f43">Bugün yapabileceklerin</b><ul style="margin:6px 0 10px 18px">' + D.BUGUN.map(function (x) { return '<li>' + U.esc(x) + '</li>'; }).join('') + '</ul></div>';
-    h += '<button class="b ana" id="sTekrar">Tekrar dene</button><button class="b" id="sAna">Ana menü</button></div>';
+    h += '<button class="b" id="sFrag">🎬 Bitiş fragmanı</button><button class="b ana" id="sTekrar">Tekrar dene</button><button class="b" id="sAna">Ana menü</button></div>';
     ekran('hikaye_son', h);
     $('sTekrar').onclick = yeniOyunForm; $('sAna').onclick = anaMenu;
+    $('sFrag').onclick = function () { fragman(oyunSonu); };
   }
 
-  return { init: init, anaMenu: anaMenu, ekranKapat: ekranKapat, oyunSonu: oyunSonu, nasilOynanir: nasilOynanir, METIN: METIN };
+  // ---------- Bitiş fragmanı ----------
+  var fragZ = [];
+  function fragDurdur() { fragZ.forEach(clearTimeout); fragZ = []; }
+  function fragman(donus) {
+    fragDurdur(); yaziDurdur(); UI.goster(false);
+    var kareler = [
+      { img: 'kapak', ms: 5200, h: '<h1>SON ŞANS</h1><div class="cum">Bu bir tahmin değil.<br>“Hiçbir şey yapılmasaydı” kurgusu.</div>' },
+      { img: 'hikaye_6', ms: 5200, h: '<div class="rol">2040</div><div class="cum">Sığınaktan çıktın.<br>Yerde tek bir yeşil filiz var.</div>' },
+      { img: 'hikaye_son', ms: 5600, h: '<div class="rol">AMA HER ÇÖZÜM BUGÜN VAR</div><div class="cum">Rüzgâr · Güneş · Ağaç · Su · Kompost · Erken uyarı</div><div class="cum" style="font-size:36px;color:#ff9f43">2040\'ı beklemek zorunda değiliz.</div>' },
+      { img: null, ms: 4800, h: '<div class="rol">OYUN TASARIMI VE YAZILIM</div><div class="ad">Muhammed Can Harmanşah</div>' },
+      { img: null, ms: 4800, h: '<div class="rol">KARAKTER TASARIMI</div><div class="ad">Elif Pınar</div>' },
+      { img: null, ms: 4800, h: '<div class="rol">GAMEUP TÜRKİYE OYUN HACKATHONU 2026</div><div class="cum">COP31 odak alanları:<br>enerji · gıda · dirençli şehirler · okyanus · eğitim · sıfır atık</div>' },
+      { img: 'kapak', ms: 0, son: 1, h: '<h1>SON ŞANS</h1><div class="cum">Köyü sen kurtar.</div><div class="btnler"><button class="b ana" id="fAna" style="width:auto;padding:12px 26px">Ana menü</button><button class="b" id="fYeni" style="width:auto;padding:12px 26px">Yeni oyun</button></div>' }
+    ];
+    var cur = 0;
+    function goster(i) {
+      cur = i;
+      var k = kareler[i];
+      ekran(k.img, '<div class="frag">' + k.h + (k.son ? '' : '<div class="atlaipucu">Atlamak için tıkla</div>') + '</div>');
+      if (k.son) {
+        $('fAna').onclick = function (e) { e.stopPropagation(); fragDurdur(); $('ekran').onclick = null; anaMenu(); };
+        $('fYeni').onclick = function (e) { e.stopPropagation(); fragDurdur(); $('ekran').onclick = null; yeniOyunForm(); };
+        $('ekran').onclick = null;
+        return;
+      }
+      fragZ.push(setTimeout(function () { goster(i + 1); }, k.ms));
+    }
+    goster(0);
+    $('ekran').onclick = function (e) {
+      if (e.target.closest && e.target.closest('button')) return;
+      fragDurdur(); goster(Math.min(cur + 1, kareler.length - 1));
+    };
+  }
+
+  return { fragman: fragman, init: init, anaMenu: anaMenu, ekranKapat: ekranKapat, oyunSonu: oyunSonu, nasilOynanir: nasilOynanir, METIN: METIN };
 })();

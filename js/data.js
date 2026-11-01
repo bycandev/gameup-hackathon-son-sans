@@ -1,5 +1,5 @@
 var D = {
-  BASLIK: 'İSİM YAKINDA',
+  BASLIK: 'SON ŞANS',
   N: 64, T: 32, YIL0: 2040, MEVSIM_GUN: 7, YIL_GUN: 28,
   AFET_HIZ: 2.6, // afet sıklığı çarpanı (demo için hızlı felaketler)
   DK_SANIYE: 8, // 1x hızda 1 gerçek saniye = 8 oyun dakikası (1 gün ≈ 3 dk)

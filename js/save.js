@@ -18,6 +18,7 @@ var Kayit = (function () {
     o.etki = []; o.yatakSay = {};
     G = o;
     for (var i = 0; i < D.N * D.N; i++) W.gecHesapla(i % D.N, (i / D.N) | 0);
+    W.VX = o.vx || 24; W.VY = o.vy || 32; o.vx = W.VX; o.vy = W.VY;
     B.idAyarla();
     G.secili = [];
     for (var j = 0; j < G.birim.length; j++) { G.birim[j].secili = false; G.birim[j].red = {}; if (G.birim[j].is) { G.birim[j].is = null; G.birim[j].yol = []; } }
@@ -47,5 +48,5 @@ var Kayit = (function () {
     r.onload = function () { try { ac(r.result); cb(true); } catch (e) { console.error(e); cb(false); } };
     r.readAsText(dosya);
   }
-  return { kaydet: kaydet, yukle: yukle, var: var_, enYeni: enYeni, indir: indir, dosyadanYukle: dosyadanYukle };
+  return { paketle: paketle, ac: ac, kaydet: kaydet, yukle: yukle, var: var_, enYeni: enYeni, indir: indir, dosyadanYukle: dosyadanYukle };
 })();

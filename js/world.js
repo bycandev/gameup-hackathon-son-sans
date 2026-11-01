@@ -4,6 +4,14 @@ var W = (function () {
   var ZEMIN = ['zemin_cimen', 'zemin_toprak', 'zemin_kum', 'zemin_deniz', 'zemin_sig_su', 'zemin_dere', 'zemin_kayalik', 'zemin_orman', 'zemin_asfalt', 'zemin_kaldirim', 'zemin_moloz'];
   var RENK = ['#5a8f3c', '#7a5a3a', '#d8c48a', '#2a5f9a', '#4a86b8', '#3c78b0', '#7d7d7d', '#2f6b2f', '#444444', '#8a8a8a', '#6a5f55'];
   var VX = 24, VY = 32;
+  // Harita ön ayarları: her oyunda biri rastgele seçilir (ayrıca rastgele aynalama uygulanır)
+  var PRESET = [
+    { ad: 'Kıyı Köyü', orman: 0.38, kaya: 14, hurda: 1, kiyi: 7 },
+    { ad: 'Sık Orman', orman: 0.2, kaya: 9, hurda: 0.8, kiyi: 6 },
+    { ad: 'Kayalık Yamaç', orman: 0.52, kaya: 24, hurda: 1, kiyi: 8 },
+    { ad: 'Terk Edilmiş Şehir', orman: 0.45, kaya: 12, hurda: 2.2, kiyi: 9 },
+    { ad: 'Açık Kıyı', orman: 0.6, kaya: 10, hurda: 1.2, kiyi: 12 }
+  ];
   var DIR = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
   var _dist = new Int16Array(N * N), _prev = new Int32Array(N * N), _q = new Int32Array(N * N);
 
@@ -145,8 +153,30 @@ var W = (function () {
     return false;
   }
 
+  function cevir(fx, fy) {
+    var nt = new Uint8Array(N * N), ns = new Uint8Array(N * N), x, y;
+    for (y = 0; y < N; y++) for (x = 0; x < N; x++) {
+      var nx = fx ? N - 1 - x : x, ny = fy ? N - 1 - y : y;
+      nt[idx(nx, ny)] = G.tile[idx(x, y)]; ns[idx(nx, ny)] = G.selAlan[idx(x, y)];
+    }
+    G.tile = nt; G.selAlan = ns; G.occ = new Int32Array(N * N); G.kesif = new Uint8Array(N * N);
+    for (var i = 1; i < G.nesneler.length; i++) {
+      var o = G.nesneler[i]; if (!o) continue;
+      if (fx) o.x = N - o.x - o.w;
+      if (fy) o.y = N - o.y - o.h;
+      for (var yy = o.y; yy < o.y + o.h; yy++) for (var xx = o.x; xx < o.x + o.w; xx++) G.occ[idx(xx, yy)] = o.id;
+    }
+    if (fx) VX = N - 1 - VX;
+    if (fy) VY = N - 1 - VY;
+    for (i = 0; i < N * N; i++) gecHesapla(i % N, (i / N) | 0);
+  }
+
   function uret(seed) {
     var r = G.rand;
+    VX = 24; VY = 32;
+    var P = PRESET[Math.floor(r() * PRESET.length)];
+    var fx = r() < 0.5, fy = r() < 0.5;
+    G.harita = { ad: P.ad, fx: fx, fy: fy };
     G.tile = new Uint8Array(N * N);
     G.occ = new Int32Array(N * N);
     G.gec = new Uint8Array(N * N);
@@ -158,10 +188,10 @@ var W = (function () {
     for (y = 0; y < N; y++) for (x = 0; x < N; x++) {
       i = idx(x, y);
       var t = CIM;
-      var kiyi = 7 + U.noise(x / 6, 3, seed + 1) * 4;
+      var kiyi = P.kiyi + U.noise(x / 6, 3, seed + 1) * 4;
       var dk = 57 - U.noise(5, y / 6, seed + 2) * 3;
-      if (x < 14 + U.noise(2, y / 5, seed + 4) * 4 && y > 22 && y < 50) t = KAYA;
-      if (x < 34 && y > 9 && y < 26 && U.fbm(x / 5, y / 5, seed + 3) > 0.38) t = ORMAN;
+      if (x < P.kaya + U.noise(2, y / 5, seed + 4) * 4 && y > 22 && y < 50) t = KAYA;
+      if (x < 34 && y > 9 && y < 26 && U.fbm(x / 5, y / 5, seed + 3) > P.orman) t = ORMAN;
       if (y < kiyi - 3) t = DENIZ; else if (y < kiyi - 1) t = SIG; else if (y < kiyi + 1) t = KUM;
       if (x > dk + 3) t = DENIZ; else if (x > dk + 1) t = SIG; else if (x > dk - 1 && t !== DENIZ) t = KUM;
       G.tile[i] = t;
@@ -221,10 +251,10 @@ var W = (function () {
         else if (p < 0.58) tur = 'cali'; else if (p < 0.61) tur = 'bogurtlen'; else if (p < 0.625) tur = 'sifali';
       } else if (tt === CIM) {
         if (p < 0.03) tur = 'agac'; else if (p < 0.05) tur = 'cali'; else if (p < 0.056) tur = 'bogurtlen'; else if (p < 0.059) tur = 'sifali';
-        else if (x >= 31 && y >= 37 && p < 0.09) tur = 'hurda';
+        else if (x >= 31 && y >= 37 && p < 0.09 * P.hurda) tur = 'hurda';
       } else if (tt === KAYA) { if (p < 0.3) tur = 'kaya'; }
       else if (tt === KUM) { if (p < 0.03) tur = 'cop'; }
-      else if (tt === ASF) { if (p < 0.05) tur = 'araba'; else if (p < 0.08) tur = 'hurda'; }
+      else if (tt === ASF) { if (p < 0.05 * P.hurda) tur = 'araba'; else if (p < 0.08 * P.hurda) tur = 'hurda'; }
       else if (tt === KALD || tt === MOLOZ) { if (p < 0.07) tur = 'cop'; else if (p < 0.11) tur = 'hurda'; }
       if (!tur) {
         var dv = U.dist(x, y, VX, VY), cr = 0;
@@ -237,18 +267,22 @@ var W = (function () {
     var yer = function (kod, tur, bx, by, ek) { var o = ekle('bina', bx, by, { bina: kod, bitti: true, hp: 100 }); if (ek) for (var q in ek) o[q] = ek[q]; return o; };
     yer('ev', 'bina', 19, 30);
     yer('siginak', 'bina', 24, 29);
-    yer('dizel', 'bina', 23, 33);
+    var dz = yer('dizel', 'bina', 23, 33);
     yer('depo', 'bina', 27, 31);
     ekle('fidan', 21, 34, {});
-    ac(VX, VY, 11);
     // evlerin yakınında başlangıç hurdası
     ekle('hurda', 18, 35, {}); ekle('cop', 29, 35, {}); ekle('hurda', 28, 28, {});
     ekle('agac', 17, 28, {}); ekle('agac', 30, 33, {}); ekle('kaya', 16, 33, {}); ekle('kaya', 29, 27, {});
+    G.dizelId = dz.id;
+    cevir(fx, fy);
+    api.VX = VX; api.VY = VY;
+    ac(VX, VY, 11);
   }
 
-  return {
+  var api = {
     CIM: CIM, TOP: TOP, KUM: KUM, DENIZ: DENIZ, SIG: SIG, DERE: DERE, KAYA: KAYA, ORMAN: ORMAN, ASF: ASF, KALD: KALD, MOLOZ: MOLOZ,
     ZEMIN: ZEMIN, RENK: RENK, VX: VX, VY: VY, idx: idx, ic: ic, tanim: tanim, ekle: ekle, sil: sil, ac: ac, yol: yol, yakin: yakin, yakinMi: yakinMi,
     bul: bul, say: say, bina: bina, sayBina: sayBina, yerUygun: yerUygun, kiyiMi: kiyiMi, dereKenari: dereKenari, uret: uret, gecHesapla: gecHesapla
   };
+  return api;
 })();

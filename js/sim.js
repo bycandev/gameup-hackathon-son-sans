@@ -53,17 +53,18 @@ var S = (function () {
     for (var k in G.kay) if (k !== 'su' && k !== 'ilac' && k !== 'kirli') G.kay[k] = Math.round(G.kay[k] * zor.kay);
     G.kay.su = Math.round(30 * zor.kay);
     W.uret(seed);
+    G.vx = W.VX; G.vy = W.VY;
     G.copBaz = Math.max(50, W.say(function (o) { return o.tur === 'cop'; }));
     G.agacBaz = Math.max(20, W.say(function (o) { return o.tur === 'agac' || o.tur === 'cam' || o.tur === 'genc' || o.tur === 'fidan'; }));
     // Bonus (izdiham)
     if (opt.bonus) for (var b in opt.bonus) { if (b === 'kitaplar') { for (var q = 0; q < opt.bonus.kitaplar.length; q++) G.kitap[opt.bonus.kitaplar[q]] = true; } else G.kay[b] = (G.kay[b] || 0) + opt.bonus[b]; }
     // Birimler
     var mes = ['muhendis', 'usta', 'ogretmen'];
-    var hero = B.yeni(G.ad, G.cins, 'yetiskin', mes[Math.floor(G.rand() * 3)], 23.5, 34.5);
+    var hero = B.yeni(G.ad, G.cins, 'yetiskin', mes[Math.floor(G.rand() * 3)], W.VX - 0.5, W.VY + 2.5);
     hero.kahraman = true; hero.gorev = 'serbest';
     var m2 = ['ciftci', 'balikci', 'saglikci', 'avci', 'asci', 'coban'];
-    var u2 = B.yeni('Ayşe', 'k', 'yetiskin', m2.splice(Math.floor(G.rand() * m2.length), 1)[0], 24.5, 34.5);
-    var u3 = B.yeni('Murat', 'e', 'yetiskin', m2.splice(Math.floor(G.rand() * m2.length), 1)[0], 22.5, 34.5);
+    var u2 = B.yeni('Ayşe', 'k', 'yetiskin', m2.splice(Math.floor(G.rand() * m2.length), 1)[0], W.VX + 0.5, W.VY + 2.5);
+    var u3 = B.yeni('Murat', 'e', 'yetiskin', m2.splice(Math.floor(G.rand() * m2.length), 1)[0], W.VX - 1.5, W.VY + 2.5);
     G.birim.push(hero, u2, u3);
     G.oyuncuId = hero.id;
     hayvanUret();
@@ -82,7 +83,7 @@ var S = (function () {
         var t = G.tile[id], ok = G.gec[id] && !G.occ[id];
         if (tur[i][0] === 'hayvan_marti') ok = ok && W.kiyiMi(x, y);
         else if (tur[i][0] === 'hayvan_karaca') ok = ok && t === W.ORMAN;
-        else if (tur[i][0] === 'hayvan_kedi') ok = ok && x > 30 && y > 36;
+        else if (tur[i][0] === 'hayvan_kedi') ok = ok && (t === W.ASF || t === W.KALD || t === W.MOLOZ);
         else ok = ok && (t === W.CIM || t === W.ORMAN);
         if (ok) { G.hayvan.push({ s: tur[i][0], x: x + 0.5, y: y + 0.5, tx: x + 0.5, ty: y + 0.5, yon: 1 }); n++; }
       }
@@ -189,6 +190,11 @@ var S = (function () {
     }
   }
 
+  function dizelYakin(u) {
+    var o = G.nesneler[G.dizelId];
+    return !!o && U.dist(u.x, u.y, o.x + 0.5, o.y + 0.5) < 6;
+  }
+
   function ihtiyac(u, dt) {
     if (u.olu) return;
     var z = G.zor.ihtiyac, f = u.uyku ? 0.6 : 1, c = u.yas === 'cocuk' ? 0.7 : 1;
@@ -203,7 +209,7 @@ var S = (function () {
     // hava kalitesi
     var ht = 100;
     for (var kk in G.ates) { var i = +kk; if (U.dist(u.x, u.y, i % N, (i / N) | 0) < 9) { ht = 40; break; } }
-    if (G.enerji.dizel && U.dist(u.x, u.y, 23.5, 33.5) < 6) ht = Math.min(ht, 70);
+    if (G.enerji.dizel && dizelYakin(u)) ht = Math.min(ht, 70);
     u.hava += (ht - u.hava) * (1 - Math.exp(-dt / 60));
     if (u.hava < 55 && !u.hasta && G.rand() < 0.002 * dt * G.zor.hastalik) hastalan(u, 'solunum');
 
@@ -497,7 +503,7 @@ var S = (function () {
     var cokvar = g.kisiler.some(function (q) { return q.yas !== 'yetiskin'; });
     if (k === 'ret') { G.moral += cokvar ? -8 : -3; bildir('Gelenler geri çevrildi. Moral düştü.', 'uyari'); return; }
     for (var i = 0; i < g.kisiler.length; i++) {
-      var q = g.kisiler[i], u = B.yeni(q.ad, q.cins, q.yas, q.meslek, 21.5 + i, 36.5);
+      var q = g.kisiler[i], u = B.yeni(q.ad, q.cins, q.yas, q.meslek, W.VX - 2.5 + i, W.VY + 4.5);
       if (q.hasta) { if (k === 'karantina') u.karantina = true; hastalan(u, 'bulasici'); }
       if (k === 'karantina' && !q.hasta) u.karantina = true;
       G.birim.push(u); G.istat.kurtarilan++;
@@ -676,6 +682,7 @@ var S = (function () {
 
   return {
     gun: gun, saat: saat, mevsim: mevsim, yil: yil, adim: adim, yeniOyun: yeniOyun, bildir: bildir, kart: kart, dogaDegis: dogaDegis,
+    afetBasla: afetBasla,
     karne: karne, yenOran: yen, yemekToplam: yemekToplam, yatakSayisi: yatakSayisi, kitapBul: kitapBul, ders: function () { G.moral = Math.min(100, G.moral + 0.4); dogaDegis(0.1); G.istat.ders = (G.istat.ders || 0) + 1; }, gelenKarar: gelenKarar, soruCevap: soruCevap, afetVar: afetVar,
     hastalan: hastalan, saatlik: saatlik, etkiHesapla: etkiHesapla, HASTALIK: HASTALIK
   };
