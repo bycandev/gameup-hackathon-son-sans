@@ -30,7 +30,7 @@ var S = (function () {
     UI.bilgiKarti(c.b, c.m, c.t, c.k);
   }
 
-  function yatakSayisi() { return (W.sayBina('ev') + W.sayBina('siginak')) * 4; }
+  function yatakSayisi() { return (W.sayBina('ev') + W.sayBina('siginak')) * 2; }
 
   function yeniOyun(opt) {
     var seed = opt.seed || (Math.floor(Math.random() * 1e9));
@@ -44,7 +44,7 @@ var S = (function () {
       sapma: 0, yagmurBas: -1, yagmurSon: -1,
       afet: [], bekleyen: [],
       balik: 100, moral: 55, moralKalici: 0, doga: 30, kuresel: D.KURESEL0, ikiAsildi: false, sonOlum: 0, kedi: 0,
-      kural: { mesai: 'normal', dizel: true, tayin: 'esit' }, ekim: 'nohut',
+      kural: { mesai: 'normal', dizel: true, tayin: 'esit', gelen: 'sor' }, sonuclar: [], ekim: 'nohut',
       kitap: {}, bilgiler: [], bildirimler: [], kartGor: {}, soruGor: {}, soruGun: -1, soruSaat: 12,
       enerji: { uret: 0, tuk: 0, depo: 0, kap: 0, yeterli: true, dizel: false },
       istat: { kes: 0, hasat: 0, fidan: 0, balik: 0, yapi: 0, kesif: 0, olumler: [], enNufus: 3, uretYen: 0, uretDizel: 0, kurtarilan: 0, kitap: 0 },
@@ -475,17 +475,20 @@ var S = (function () {
   }
 
   function gelenUret() {
-    if (G.gelen || gun() < 2 || G.rand() > 0.12 || G.moral < 35 || B.nufus() >= yatakSayisi()) return;
-    var n = 1 + Math.floor(G.rand() * 2), grup = [];
+    var bos = yatakSayisi() - B.nufus();
+    if (G.gelen || bos <= 0 || G.moral < 25) return;
+    // boş yatak varsa her gün nüfus artışı olasılığı yüksek
+    if (G.rand() > Math.min(0.9, 0.45 + 0.15 * bos)) return;
+    var n = Math.min(bos, 1 + Math.floor(G.rand() * 2)), grup = [];
     var meslekler = Object.keys(D.MESLEK);
     for (var i = 0; i < n; i++) {
       var c = G.rand() < 0.5 ? 'k' : 'e', r = G.rand(), yas = r < 0.2 ? 'cocuk' : (r < 0.35 ? 'yasli' : 'yetiskin');
       var ad = yas === 'cocuk' ? U.pick(D.AD_C, G.rand) : U.pick(c === 'k' ? D.AD_K : D.AD_E, G.rand);
       var m = yas === 'cocuk' ? 'ogrenci' : (yas === 'yasli' ? 'emekli' : U.pick(meslekler.filter(function (q) { return q !== 'emekli' && q !== 'ogrenci'; }), G.rand));
-      grup.push({ ad: ad, cins: c, yas: yas, meslek: m, hasta: G.rand() < 0.2 * G.zor.hastalik });
+      grup.push({ ad: ad, cins: c, yas: yas, meslek: m, hasta: G.rand() < 0.15 * G.zor.hastalik });
     }
     G.gelen = { yer: U.pick(D.YER, G.rand), kisiler: grup };
-    UI.yeniGelenGoster(G.gelen);
+    if (G.kural.gelen === 'oto') gelenKarar('kabul'); else UI.yeniGelenGoster(G.gelen);
   }
 
   function gelenKarar(k) {
@@ -525,9 +528,58 @@ var S = (function () {
     UI.soruGoster(q2, kisi);
   }
 
+  function koyYakin(f, n) {
+    var l = [];
+    for (var i = 1; i < G.nesneler.length; i++) { var o = G.nesneler[i]; if (o && f(o)) l.push({ o: o, d: U.dist(o.x, o.y, W.VX, W.VY) }); }
+    l.sort(function (a, b) { return a.d - b.d; });
+    return l.slice(0, n).map(function (q) { return q.o; });
+  }
+  function tepki(k, v) {
+    var i, o;
+    if (k === 'fidan') {
+      var c = 0, t = 0;
+      while (c < v && t++ < 300) {
+        var a = G.rand() * 6.28, r = 4 + G.rand() * 9, x = Math.round(W.VX + Math.cos(a) * r), y = Math.round(W.VY + Math.sin(a) * r);
+        if (W.ic(x, y) && G.gec[W.idx(x, y)] && !G.occ[W.idx(x, y)] && G.tile[W.idx(x, y)] === W.CIM) { W.ekle('fidan', x, y, { dogum: G.dk }); c++; G.istat.fidan++; }
+      }
+      bildir('Karar sonucu: köyün çevresine ' + c + ' fidan dikildi.', 'iyi');
+    } else if (k === 'agacKes') {
+      var ag = koyYakin(function (q) { return q.tur === 'agac' || q.tur === 'cam'; }, v);
+      ag.forEach(function (q) { var x = q.x, y = q.y; W.sil(q); W.ekle('kutuk', x, y, {}); });
+      bildir('Karar sonucu: ' + ag.length + ' ağaç kesildi, yamaç seyrekleşti.', 'uyari');
+    } else if (k === 'copTemizle') {
+      var cp = koyYakin(function (q) { return q.tur === 'cop'; }, v);
+      cp.forEach(function (q) { W.sil(q); });
+      bildir('Karar sonucu: ' + cp.length + ' çöp yığını temizlendi.', 'iyi');
+    } else if (k === 'copEkle') {
+      var n = 0, t2 = 0;
+      while (n < v && t2++ < 200) { var x2 = Math.round(W.VX + (G.rand() - 0.5) * 16), y2 = Math.round(W.VY + (G.rand() - 0.5) * 16); if (W.ic(x2, y2) && G.gec[W.idx(x2, y2)] && !G.occ[W.idx(x2, y2)]) { W.ekle('cop', x2, y2, {}); n++; } }
+      bildir('Karar sonucu: köyün çevresinde ' + n + ' yeni çöp yığını birikti.', 'kotu');
+    } else if (k === 'duman') {
+      G.birim.forEach(function (u) { if (!u.olu) u.hava = Math.min(u.hava, 30); });
+      bildir('Karar sonucu: yakılan çöpün zehirli dumanı köyü sardı.', 'kotu');
+    } else if (k === 'kural') {
+      for (var q in v) G.kural[q] = v[q];
+      bildir('Karar sonucu: köy kuralı değişti (Kurallar menüsünden görebilirsin).', 'iyi');
+    } else if (k === 'guclendir') {
+      var gu = koyYakin(function (q) { return q.tur === 'bina' && q.bitti && !q.guclu && ['ev', 'siginak', 'ruzgar', 'yagmur', 'gozcu', 'kuyu', 'gunes'].indexOf(q.bina) >= 0; }, v);
+      gu.forEach(function (q) { q.guclu = true; });
+      bildir('Karar sonucu: ' + gu.length + ' yapı güçlendirildi.', 'iyi');
+    } else if (k === 'hasarBina') {
+      var hb = koyYakin(function (q) { return q.tur === 'bina' && q.bitti && q.bina !== 'siginak'; }, 8);
+      if (hb.length) { o = hb[Math.floor(G.rand() * hb.length)]; o.hp = (o.hp === undefined ? 100 : o.hp) - 45; bildir('Sonuç: ' + ((D.BINA[o.bina] || {}).ad || 'bir yapı') + ' hasar gördü.', 'kotu'); if (o.hp <= 0) W.sil(o); }
+    } else if (k === 'kedi') {
+      G.kedi += v;
+      for (i = 0; i < v; i++) G.hayvan.push({ s: 'hayvan_kedi', x: W.VX + 0.5, y: W.VY + 3.5, tx: W.VX + 0.5, ty: W.VY + 3.5, yon: 1, katildi: true });
+      bildir('Karar sonucu: köye bir kedi yerleşti.', 'iyi');
+    } else if (k === 'kitap') kitapBul();
+  }
+  var TEPKI = { fidan: 1, agacKes: 1, copTemizle: 1, copEkle: 1, duman: 1, kural: 1, guclendir: 1, hasarBina: 1, kedi: 1, kitap: 1 };
+
   function etkiUygula(e) {
     for (var k in e) {
       var v = e[k];
+      if (TEPKI[k]) { tepki(k, v); continue; }
       if (D.KAYNAK[k]) G.kay[k] = Math.max(0, G.kay[k] + v);
       else if (k === 'moral') G.moral = U.clamp(G.moral + v, 0, 100);
       else if (k === 'doga') dogaDegis(v);
@@ -540,6 +592,7 @@ var S = (function () {
     var s = q.sec[i], e = s.e, m = s.s;
     if (s.p !== undefined && G.rand() >= s.p) { e = s.e2 || {}; m = s.s2 || m; }
     etkiUygula(e || {});
+    if (s.ertele) G.sonuclar.push({ gun: gun() + s.ertele.gun, s: s.ertele.s, e: s.ertele.e });
     G.bilgiler.push({ b: q.baslik || 'Köylü sorusu', m: q.bilgi, t: '', k: q.k, gun: gun() });
     return { sonuc: m, e: e };
   }
@@ -575,6 +628,13 @@ var S = (function () {
     ];
   }
 
+  function sonuclariIsle() {
+    for (var i = G.sonuclar.length - 1; i >= 0; i--) {
+      var q = G.sonuclar[i];
+      if (q.gun <= gun()) { G.sonuclar.splice(i, 1); bildir('Kararının sonucu: ' + q.s, 'uyari'); etkiUygula(q.e || {}); }
+    }
+  }
+
   function gunluk(ilk) {
     G.gunNo = gun();
     G.sapma = (G.rand() - 0.5) * 6;
@@ -584,6 +644,7 @@ var S = (function () {
     G.yagmurBas = yagmurlu ? 6 + Math.floor(G.rand() * 12) : -1;
     G.yagmurSon = yagmurlu ? G.yagmurBas + 2 + Math.floor(G.rand() * 5) : -1;
     if (ilk) return;
+    sonuclariIsle();
     afetPlanla();
     kuresel();
     hastaGunluk();

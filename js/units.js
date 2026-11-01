@@ -221,7 +221,7 @@ var B = (function () {
     for (var i = 1; i < G.nesneler.length; i++) {
       var o = G.nesneler[i];
       if (!o || o.tur !== 'bina' || !o.bitti || (o.bina !== 'ev' && o.bina !== 'siginak')) continue;
-      if (G.yatakSay && (G.yatakSay[o.id] || 0) >= 4) continue;
+      if (G.yatakSay && (G.yatakSay[o.id] || 0) >= 2) continue;
       var d = Math.abs(o.x - u.x) + Math.abs(o.y - u.y);
       if (d < bd) { bd = d; best = o; }
     }

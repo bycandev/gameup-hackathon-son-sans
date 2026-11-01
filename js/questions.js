@@ -3,13 +3,13 @@ var QUESTIONS = [
   { id: 'yamac_agac', soru: 'Odun azaldı. Köyün üstündeki yamaçta sık ağaçlar var; hepsini kesip bir kerede stok yapalım mı?', k: 'IPCC AR6',
     bilgi: 'Ormanlar karbon depolar, toprağı tutar ve yerel sıcaklığı düşürür. Seçici kesim ve yeniden ağaçlandırma, toptan kesime göre çok daha dirençlidir.',
     sec: [
-      { t: 'Hepsini kes', e: { odun: 40, doga: -8, moral: -1 }, s: 'Bol odun geldi ama yamaç çıplak kaldı; toprak kaymaya açık.' },
+      { t: 'Hepsini kes', e: { odun: 40, doga: -8, moral: -1, agacKes: 16 }, s: 'Bol odun geldi ama yamaç çıplak kaldı; toprak kaymaya açık.', ertele: { gun: 3, s: 'çıplak yamaçta toprak kaydı.', e: { hasarBina: 1, doga: -3 } } },
       { t: 'Sadece kuru dalları topla', e: { odun: 10, doga: 0 }, s: 'Az ama zararsız bir odun toplandı.' },
-      { t: 'Kesilen her ağaç yerine iki fidan dik', e: { odun: 18, doga: 4, moral: 1 }, s: 'Yamaç hem odun hem umut verdi.' }] },
+      { t: 'Kesilen her ağaç yerine iki fidan dik', e: { odun: 18, doga: 4, moral: 1, agacKes: 3, fidan: 8 }, s: 'Yamaç hem odun hem umut verdi.' }] },
   { id: 'fidan_gunu', soru: 'Çocuklarla bir fidan dikme günü yapalım mı? Bir günlük iş kaybederiz ama…', k: 'Avrupa Çevre Ajansı',
     bilgi: 'Ağaçlar gölge verir, kentsel ısıyı birkaç derece düşürür ve toprağı tutar. Topluluk çalışmaları aidiyet duygusunu da artırır.',
     sec: [
-      { t: 'Evet, herkes katılsın', e: { doga: 5, moral: 5, odun: -5 }, s: 'Çocuklar çok eğlendi, köy yeşillendi.' },
+      { t: 'Evet, herkes katılsın', e: { doga: 5, moral: 5, odun: -5, fidan: 7 }, s: 'Çocuklar çok eğlendi, köy yeşillendi.' },
       { t: 'Şimdi değil, iş çok', e: { moral: -1 }, s: 'İş devam etti ama içinizde bir burukluk kaldı.' }] },
   { id: 'dere_suyu', soru: 'Çok susadık. Dere suyunu kaynatmadan içelim mi? Odun da az.', k: 'WHO',
     bilgi: 'Kirli su ishal gibi hastalıkların başlıca nedenidir. Kaynatmak ya da filtrelemek riski büyük ölçüde azaltır.',
@@ -48,7 +48,7 @@ var QUESTIONS = [
     sec: [
       { t: 'Komposta', e: { doga: 2, tohum: 1 }, s: 'Toprak zenginleşti.' },
       { t: 'Hayvanlara', e: { moral: 1 }, s: 'Sokak hayvanları sevindi.' },
-      { t: 'Çöpe at', e: { doga: -1 }, s: 'Koku yayıldı, atık arttı.' }] },
+      { t: 'Çöpe at', e: { doga: -1, copEkle: 3 }, s: 'Koku yayıldı, atık arttı.' }] },
   { id: 'hasat_senlik', soru: 'Hasat iyi geçti, şenlik yapalım mı?', k: 'UNDRR',
     bilgi: 'Topluluk bağları, afetlere dayanıklılığın en önemli unsurlarından biridir. Birlikte sevinmek de uyumun parçasıdır.',
     sec: [
@@ -62,8 +62,8 @@ var QUESTIONS = [
   { id: 'kiyi_cop', soru: 'Kıyıya yine plastik birikmiş. Bir gün kıyı temizliği yapalım mı?', k: 'UNEP',
     bilgi: 'Plastikler denizde parçalanıp mikroplastiğe dönüşür ve besin zincirine girer. Kıyı temizliği hem doğa hem geri dönüşüm için kazançtır.',
     sec: [
-      { t: 'Yapalım', e: { plastik: 8, doga: 3, moral: 2 }, s: 'Kıyı tertemiz oldu, plastik de işe yarayacak.' },
-      { t: 'Başka işlerimiz var', e: { doga: -1 }, s: 'Kıyı kirli kaldı.' }] },
+      { t: 'Yapalım', e: { plastik: 8, doga: 3, moral: 2, copTemizle: 14 }, s: 'Kıyı tertemiz oldu, plastik de işe yarayacak.' },
+      { t: 'Başka işlerimiz var', e: { doga: -1, copEkle: 4 }, s: 'Kıyı kirli kaldı.' }] },
   { id: 'dizel_mi', soru: 'Eski jeneratörde biraz yakıt kaldı. Bitene kadar çalıştıralım mı, yoksa acil durumlara mı saklayalım?', k: 'IPCC AR6, Climate Watch',
     bilgi: 'Fosil yakıt yakmak sera gazı ve hava kirliliği demektir. Yenilenebilir enerji ile birleşen acil yedekler dengeli bir geçiş sağlar.',
     sec: [
@@ -82,7 +82,7 @@ var QUESTIONS = [
   { id: 'ogle_mesai', soru: 'Öğle sıcağında çalışmak çok zor. Mesaiyi sabah erken ve akşama alalım mı?', ms: [1], k: 'Lancet Countdown 2025',
     bilgi: 'Aşırı sıcaklar iş gücü kaybına ve sıcakla ilişkili ölümlere yol açar. “Serin mesai” en ucuz ve etkili önlemlerdendir. Kurallar menüsünden de açabilirsin.',
     sec: [
-      { t: 'Evet, sabah ve akşam çalışalım', e: { moral: 3 }, s: 'Köylüler öğleyi gölgede geçirecek (Kurallar menüsünden “Serin mesai” seçebilirsin).' },
+      { t: 'Evet, sabah ve akşam çalışalım', e: { moral: 3, kural: { mesai: 'serin' } }, s: 'Köylüler öğleyi gölgede geçirecek (Kurallar menüsünden “Serin mesai” seçebilirsin).' },
       { t: 'Hayır, iş bitmeli', e: { hasta: 1, moral: -2 }, s: 'Biri sıcaktan bitap düştü.' }] },
   { id: 'sifali_ot', soru: 'İlaç azaldı. Yaşlıların bildiği şifalı otlarla mı idare edelim?', k: 'WHO',
     bilgi: 'Geleneksel bilgi tamamlayıcı olabilir ama ciddi hastalıkların yerini tutmaz. İkisini birlikte yürütmek en iyisidir.',
@@ -118,18 +118,18 @@ var QUESTIONS = [
   { id: 'yasli_bilgi', soru: 'Yaşlılarımız eskiden kuraklıkta nasıl idare ettiklerini anlatmak istiyor. Bir akşam toplanalım mı?', k: 'IPCC AR6',
     bilgi: 'Yerel ve yerli bilgi, iklim uyumunun değerli bir kaynağıdır.',
     sec: [
-      { t: 'Toplanalım', e: { moral: 4, tohum: 2 }, s: 'Eski yöntemlerden faydalı ipuçları çıktı.' },
+      { t: 'Toplanalım', e: { moral: 4, tohum: 2, kitap: 1 }, s: 'Eski yöntemlerden faydalı ipuçları çıktı.' },
       { t: 'Vakit yok', e: { moral: -1 }, s: 'Bu fırsat kaçtı.' }] },
   { id: 'kedi_besle', soru: 'Sokak kedileri depoya dadandı. Besleyelim mi, kovalım mı?', k: '—',
     bilgi: 'Kediler fare ve böceklerle mücadelede topluluğa yardımcı olur; moral için de iyidir.',
     sec: [
-      { t: 'Besleyelim, fareleri kovarlar', e: { yemek: -2, moral: 4 }, s: 'Depo fareden kurtuldu, kediler mutlu.' },
+      { t: 'Besleyelim, fareleri kovarlar', e: { yemek: -2, moral: 4, kedi: 1 }, s: 'Depo fareden kurtuldu, kediler mutlu.' },
       { t: 'Kovalım', e: { moral: -2 }, s: 'Çocuklar üzüldü.' }] },
   { id: 'cop_yak', soru: 'Çöp yığını büyüdü, kokuyor. Yakalım mı?', k: 'UNEP',
     bilgi: 'Çöp yakmak zehirli duman çıkarır ve karbon salar. Ayrıştırma ve geri dönüşüm atığı kaynağa çevirir (sıfır atık).',
     sec: [
-      { t: 'Yak', e: { doga: -3, hasta: 1 }, s: 'Duman yüzünden biri öksürmeye başladı.' },
-      { t: 'Ayrıştır, geri dönüştür', e: { plastik: 5, metal: 2, doga: 2 }, s: 'Çöpten işe yarar malzeme çıktı.' }] },
+      { t: 'Yak', e: { doga: -3, hasta: 1, duman: 1, copTemizle: 10 }, s: 'Duman yüzünden biri öksürmeye başladı.' },
+      { t: 'Ayrıştır, geri dönüştür', e: { plastik: 5, metal: 2, doga: 2, copTemizle: 8 }, s: 'Çöpten işe yarar malzeme çıktı.' }] },
   { id: 'tamir_et', soru: 'Atölyede bir alet kırıldı. Yenisini mi yapalım, tamir mi?', k: 'Ellen MacArthur Vakfı',
     bilgi: 'Tamir ve yeniden kullanım, kaynak ve karbon tasarrufu sağlar. Döngüsel ekonominin temel adımıdır.',
     sec: [
@@ -138,7 +138,7 @@ var QUESTIONS = [
   { id: 'deprem_hazirlik', soru: 'İstanbul\'da büyük deprem riski hep var. Evleri güçlendirmeye öncelik verelim mi?', k: 'AFAD',
     bilgi: 'Deprem iklim değişikliğinden kaynaklanmaz, ama İstanbul için en büyük afettir; hazırlık mantığı iklim afetleriyle aynıdır: önceden güçlendirmek, çanta hazırlamak, toplanma alanı belirlemek.',
     sec: [
-      { t: 'Evet, malzeme ayır', e: { tas: -4, odun: -4, moral: 3 }, s: 'Evler daha sağlam, herkes daha huzurlu.' },
+      { t: 'Evet, malzeme ayır', e: { tas: -4, odun: -4, moral: 3, guclendir: 2 }, s: 'Evler daha sağlam, herkes daha huzurlu.' },
       { t: 'Önce yiyecek', e: { moral: 0 }, s: 'Yiyecek önceliği doğru, risk de duruyor.' }] },
   { id: 'cop_yok', soru: 'Köyde artık hemen hiç çöp yok; her şey ya tamir ya kompost ya geri dönüşüm. Bunu kutlayalım mı?', k: 'COP31 Başkanlığı', kosul: function () { return G.istat.yapi >= 4; },
     bilgi: 'Sıfır atık yaklaşımı hem kaynakları korur hem sera gazı azaltır. Küçük başarıları kutlamak sürdürülebilirliğe motivasyon verir.',

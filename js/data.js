@@ -57,7 +57,7 @@ var D = {
   BINA: {
     golgelik:  { ad: 'Gölgelik', kat: 'Barınma', s: 'yapi_golgelik', mal: { odun: 6 }, sure: 60, ac: 'Çevresini 5°C serinletir.' },
     soba:      { ad: 'Soba', kat: 'Barınma', s: 'yapi_soba', mal: { odun: 4, tas: 4 }, sure: 60, ac: 'Soğukta çevresini 10°C ısıtır, odun harcar.' },
-    ev:        { ad: 'Ev', kat: 'Barınma', s: 'yapi_ev', w: 2, h: 2, sw: 128, sh: 128, mal: { odun: 25, tas: 10, metal: 5 }, sure: 240, ac: '4 yatak, yalıtımlı.' },
+    ev:        { ad: 'Ev', kat: 'Barınma', s: 'yapi_ev', w: 2, h: 2, sw: 128, sh: 128, mal: { odun: 25, tas: 10, metal: 5 }, sure: 240, ac: '2 yatak, yalıtımlı. Boş yatak varsa yeni insanlar gelir.' },
     ocak:      { ad: 'Ocak', kat: 'Gıda', s: 'yapi_ocak', mal: { tas: 6, odun: 4 }, sure: 60, ac: 'Pişmiş yemek %25 daha doyurucu.' },
     tarla:     { ad: 'Tarla', kat: 'Gıda', s: 'yapi_tarla', zemin: 1, mal: { odun: 2 }, sure: 30, ac: 'Ekin yetiştirir. Sulanması gerekir.' },
     kompost:   { ad: 'Kompost', kat: 'Gıda', s: 'yapi_kompost', mal: { odun: 4 }, sure: 45, ac: 'Yakındaki tarlalar %30 hızlı büyür.' },

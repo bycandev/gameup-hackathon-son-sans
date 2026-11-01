@@ -43,8 +43,10 @@ var UI = (function () {
 
   function etkiMetni(e) {
     var p = [];
+    var OZ = { fidan: 'fidan dikilir', agacKes: 'ağaç kesilir', copTemizle: 'çöp yığını temizlenir', copEkle: 'çöp birikir', kedi: 'kedi katılır', kitap: 'kitap bulunur', guclendir: 'yapı güçlendirilir', hasarBina: 'yapı hasar görür', duman: 'duman yayılır' };
     for (var k in e) {
-      var v = e[k]; if (!v) continue;
+      var v = e[k]; if (!v || k === 'kural') continue;
+      if (OZ[k]) { p.push(v + ' ' + OZ[k]); continue; }
       var ad = D.KAYNAK[k] ? D.KAYNAK[k].ad : (k === 'moral' ? 'Moral' : (k === 'doga' ? 'Doğa' : (k === 'hasta' ? 'Hasta' : k)));
       p.push((v > 0 ? '+' : '') + v + ' ' + ad);
     }
@@ -197,6 +199,7 @@ var UI = (function () {
       h += '<div class="kart"><b>Mesai</b><br><select data-k="mesai"><option value="normal"' + (G.kural.mesai === 'normal' ? ' selected' : '') + '>Normal (06-21)</option><option value="serin"' + (G.kural.mesai === 'serin' ? ' selected' : '') + '>Serin (sabah-akşam, öğle gölgede)</option></select><br><small class="gri">Isı dalgasında hayat kurtarır.</small></div>';
       h += '<div class="kart"><b>Tayın</b><br><select data-k="tayin"><option value="esit"' + (G.kural.tayin === 'esit' ? ' selected' : '') + '>Eşit</option><option value="kisitli"' + (G.kural.tayin === 'kisitli' ? ' selected' : '') + '>Kısıtlı (tasarruf, moral cezası)</option></select></div>';
       h += '<div class="kart"><b>Dizel jeneratör</b><br><select data-k="dizel"><option value="1"' + (G.kural.dizel ? ' selected' : '') + '>Gerekirse kullan</option><option value="0"' + (!G.kural.dizel ? ' selected' : '') + '>Sakla (kirletmez)</option></select></div>';
+      h += '<div class="kart"><b>Yeni gelenler</b><br><select data-k="gelen"><option value="sor"' + (G.kural.gelen !== 'oto' ? ' selected' : '') + '>Her seferinde sor</option><option value="oto"' + (G.kural.gelen === 'oto' ? ' selected' : '') + '>Otomatik kabul et</option></select><br><small class="gri">Boş yatak varsa her gün yeni insanlar gelebilir. Yeni ev = yeni yatak.</small></div>';
       h += '<div class="kart"><b>Ekim tercihi</b><br><select data-k="ekim">';
       for (var e in D.EKIN) { var ek = D.EKIN[e]; if (ek.kitap && !G.kitap[ek.kitap]) continue; h += '<option value="' + e + '"' + (G.ekim === e ? ' selected' : '') + '>' + ek.ad + ' (' + ek.gun + ' gün, ' + ek.verim + ' verim)</option>'; }
       h += '</select></div>';
@@ -237,7 +240,7 @@ var UI = (function () {
     q = pe.querySelectorAll('[data-u]'); for (i = 0; i < q.length; i++) q[i].onclick = function () { sec([+this.getAttribute('data-u')]); var u = birim(+this.getAttribute('data-u')); R.cam.x = u.x * D.T; R.cam.y = u.y * D.T; };
     q = pe.querySelectorAll('[data-k]'); for (i = 0; i < q.length; i++) q[i].onchange = function () {
       var k = this.getAttribute('data-k');
-      if (k === 'dizel') G.kural.dizel = this.value === '1'; else if (k === 'ekim') G.ekim = this.value; else G.kural[k] = this.value;
+      if (k === 'dizel') G.kural.dizel = this.value === '1'; else if (k === 'gelen') G.kural.gelen = this.value; else if (k === 'ekim') G.ekim = this.value; else G.kural[k] = this.value;
     };
     if (panel === 'menu') {
       $('mKaydet').onclick = function () { toast(Kayit.kaydet('elle') ? 'Oyun kaydedildi.' : 'Kayıt başarısız.', 'iyi'); };
@@ -292,7 +295,7 @@ var UI = (function () {
         else {
           h += bar('Sağlamlık', o.hp === undefined ? 100 : o.hp);
           if (o.bina === 'tarla') h += '<p>' + (o.ekin ? D.EKIN[o.ekin].ad + (o.oldu ? ' (kurudu)' : ' — büyüme %' + Math.round(o.buyume * 100)) + '<br>Su %' + Math.round(o.su * 100) : 'Boş tarla') + '</p>';
-          if (o.bina === 'ev' || o.bina === 'siginak') h += '<p>4 yatak</p>';
+          if (o.bina === 'ev' || o.bina === 'siginak') h += '<p>2 yatak</p>';
           h += '<p>' + (o.guclu ? '🛡️ Güçlendirilmiş' : '') + '</p>';
           if (!o.guclu && o.bina !== 'tarla') h += '<button id="oGuclu">Güçlendir (taş 4, odun 2)</button> ';
         }
@@ -447,14 +450,14 @@ var UI = (function () {
     cop: ['Çöp yığını', '2 plastik verir. Toplanmazsa doğayı zehirler (doğa dengesi düşer); toplamak iyileştirir (sıfır atık).', 'Sağ tık → Topla'],
     araba: ['Araba hurdası', '6 metal ve 2 plastik verir.', 'Sağ tık → Topla'],
     kitap: ['Eski kitap', 'Okununca yeni bir bilgi/yapı açar.', 'Sağ tık → Topla'],
-    yikik_ev: ['Yıkık ev', 'Yağmala: odun, metal, plastik, bazen konserve/kitap. Onar: 4 yataklı ev olur. Sök: odun, taş, metal.', 'Sağ tık → Yağmala / Onar / Sök'],
+    yikik_ev: ['Yıkık ev', 'Yağmala: odun, metal, plastik, bazen konserve/kitap. Onar: 2 yataklı ev olur. Sök: odun, taş, metal.', 'Sağ tık → Yağmala / Onar / Sök'],
     market: ['Yıkık market', 'Yağmala: konserve, su, plastik, tohum.', 'Sağ tık → Yağmala'],
     okul: ['Yıkık okul', 'Yağmala: Afet Hazırlığı kitabı, plastik.', 'Sağ tık → Yağmala'],
     hastane: ['Yıkık hastane', 'Yağmala: ilaç ve metal.', 'Sağ tık → Yağmala'],
     kutuphane: ['Yıkık kütüphane', 'Yağmala: eski kitaplar (Ziraat, Elektrik, Su, İnşaat…).', 'Sağ tık → Yağmala']
   };
   var ZEMINAD = ['Çimen', 'Toprak', 'Kum', 'Derin deniz', 'Sığ su', 'Dere (kirli su alınır)', 'Kayalık', 'Orman zemini', 'Asfalt', 'Kaldırım', 'Moloz'];
-  var OZELB = { siginak: '4 yatak, yalıtımlı. Gece ve aşırı sıcakta korur.', dizel: 'Enerji açığında 3 kW verir, yakıt harcar, havayı kirletir.', depo: 'Köyün malzeme deposu.' };
+  var OZELB = { siginak: '2 yatak, yalıtımlı. Gece ve aşırı sıcakta korur.', dizel: 'Enerji açığında 3 kW verir, yakıt harcar, havayı kirletir.', depo: 'Köyün malzeme deposu.' };
 
   function ipucuMetni(wx, wy) {
     var u = birimBul(wx, wy);
