@@ -16,6 +16,18 @@ var Kayit = (function () {
     o.gec = new Uint8Array(D.N * D.N); o.kesif = Uint8Array.from(o.kesif); o.selAlan = Uint8Array.from(o.selAlan);
     o.zor = D.ZORLUK[o.zorKod]; o.rand = U.rng(o.seed + Math.floor(o.dk));
     o.etki = []; o.yatakSay = {};
+    // Eski sürümlerden kalan kayıtlar için eksik alanları tamamla
+    o.sonuclar = o.sonuclar || [];
+    o.kural = o.kural || {};
+    if (!o.kural.gelen) o.kural.gelen = 'sor';
+    if (o.balik === undefined) o.balik = 100;
+    if (!o.istat) o.istat = {};
+    o.istat.olumler = o.istat.olumler || [];
+    o.bekleyen = o.bekleyen || [];
+    o.afet = o.afet || [];
+    o.hayvan = o.hayvan || [];
+    o.kartGor = o.kartGor || {};
+    o.egitim = o.egitim || { aktif: false, adim: 0, kamera: 0 };
     G = o;
     for (var i = 0; i < D.N * D.N; i++) W.gecHesapla(i % D.N, (i / D.N) | 0);
     W.VX = o.vx || 24; W.VY = o.vy || 32; o.vx = W.VX; o.vy = W.VY;
