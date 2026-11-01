@@ -154,6 +154,20 @@ var D = {
     kirlisu: { b: 'Kirli su', m: 'Dere suyu mikrop taşıyabilir. Kaynatmak ya da filtrelemek ishal riskini düşürür. Seller kirli suyu daha da artırır.', t: 'Tedbir: filtre, arıtma, yağmur suyu.', k: 'WHO' }
   },
 
+  BILGI: [
+    ['Akdeniz havzası dünya ortalamasından yaklaşık %20 daha hızlı ısınıyor.', 'MedECC'],
+    ['Küresel ısınmayla biriken fazla ısının yaklaşık %90\'ı okyanus tarafından emiliyor.', 'IPCC AR6'],
+    ['İnsanların yaklaşık %89\'u iklim eylemini destekliyor; ama çoğu başkalarının desteklemediğini sanıyor ("sessiz çoğunluk").', 'Andre vd., Nature Climate Change, 2024'],
+    ['Paris Anlaşması: sıcaklık artışını 2°C\'nin belirgin altında tutmak, mümkünse 1,5°C için çaba göstermek.', 'UNFCCC'],
+    ['Rüzgâr ve güneş birçok ülkede yeni elektrik üretiminin en ucuz yolu.', 'IEA, IRENA'],
+    ['Deprem iklim değişikliğinden kaynaklanmaz ama İstanbul için en büyük afettir; hazırlık mantığı aynıdır.', 'AFAD'],
+    ['Gıda atıkları çöplükte metan salar; kompost bu emisyonu azaltır ve toprağı besler.', 'UNEP'],
+    ['Açık renkli "serin çatılar" güneşi yansıtır ve iç sıcaklığı düşürür.', 'UNEP Cool Coalition'],
+    ['Aşırı sıcaklar iş gücü kaybına ve sıcakla ilişkili ölümlere yol açar; serin mesai ve gölge hayat kurtarır.', 'Lancet Countdown 2025'],
+    ['Ağaçlar gölge verir, toprağı tutar ve yerel sıcaklığı birkaç derece düşürebilir.', 'IPCC AR6, FAO'],
+    ['Plastikler denizde mikroplastiğe dönüşür ve besin zincirine girer.', 'UNEP']
+  ],
+
   BUGUN: [
     'Evinde rüzgâr ve güneş gibi yenilenebilir enerji kullanımını sor, mümkünse destekle.',
     'Su ve enerji tasarrufu yap; yağmur suyunu toplamak mümkünse bahçeni sula.',

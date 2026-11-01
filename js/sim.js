@@ -53,6 +53,7 @@ var S = (function () {
     for (var k in G.kay) if (k !== 'su' && k !== 'ilac' && k !== 'kirli') G.kay[k] = Math.round(G.kay[k] * zor.kay);
     G.kay.su = Math.round(30 * zor.kay);
     W.uret(seed);
+    G.copBaz = Math.max(50, W.say(function (o) { return o.tur === 'cop'; }));
     G.agacBaz = Math.max(20, W.say(function (o) { return o.tur === 'agac' || o.tur === 'cam' || o.tur === 'genc' || o.tur === 'fidan'; }));
     // Bonus (izdiham)
     if (opt.bonus) for (var b in opt.bonus) { if (b === 'kitaplar') { for (var q = 0; q < opt.bonus.kitaplar.length; q++) G.kitap[opt.bonus.kitaplar[q]] = true; } else G.kay[b] = (G.kay[b] || 0) + opt.bonus[b]; }
@@ -552,6 +553,28 @@ var S = (function () {
     G.bilgiler.push({ b: D.KITAP[kod].ad, m: D.KITAP[kod].ac, t: '', k: 'Bulunan kitap', gun: gun() });
   }
 
+  function yen() { var t = G.istat.uretYen + G.istat.uretDizel; return t > 0 ? G.istat.uretYen / t : 0; }
+
+  // COP31 odak alanlarına göre iklim karnesi (0-100)
+  function karne() {
+    var cl = U.clamp, n = Math.max(1, B.nufus());
+    var rg = W.sayBina('ruzgar'), gp = W.sayBina('gunes'), bt = W.sayBina('batarya');
+    var guclu = W.say(function (o) { return o.tur === 'bina' && o.bitti && o.guclu; });
+    var kiyiCop = W.say(function (o) { return o.tur === 'cop' && G.tile[W.idx(o.x, o.y)] === W.KUM; });
+    var cop = G.copSay === undefined ? W.say(function (o) { return o.tur === 'cop'; }) : G.copSay;
+    var sag = 0, canli = 0; G.birim.forEach(function (u) { if (!u.olu) { sag += u.sag - (u.hasta ? 25 : 0); canli++; } });
+    return [
+      { ad: 'Yenilenebilir enerji', em: '⚡', p: cl((rg + gp) * 30 + bt * 10 + yen() * 20, 0, 100), ip: 'Rüzgâr gülü, güneş paneli ve batarya kur; dizeli sakla.' },
+      { ad: 'Karbon ayak izi ve bilinçli tüketim', em: '👣', p: cl(100 - G.istat.uretDizel * 4 - (G.kuresel - D.KURESEL0) * 300, 0, 100), ip: 'Dizel yakma, küresel sıcaklığı yavaşlat, tamir et.' },
+      { ad: 'İklim dirençli şehirler', em: '🏘️', p: cl(guclu * 14 + W.sayBina('golgelik') * 12 + W.sayBina('serinletici') * 12 + W.sayBina('gozcu') * 20 + W.sayBina('kompost') * 6, 0, 100), ip: 'Güçlendir, gölgelik ve gözcü kulesi kur.' },
+      { ad: 'Gıda güvenliği', em: '🌾', p: cl(W.sayBina('tarla') * 14 + G.istat.hasat * 3 + (yemekToplam() > n * 6 ? 20 : 0), 0, 100), ip: 'Tarla kur, hasat et, yemek stoğu tut.' },
+      { ad: 'Okyanuslar ve denizler', em: '🌊', p: cl(G.balik * 0.8 + cl(20 - kiyiCop, 0, 20), 0, 100), ip: 'Aşırı avlanma, kıyıdaki çöpü topla.' },
+      { ad: 'İklim eğitimi', em: '📚', p: cl(G.istat.kitap * 15 + G.bilgiler.length * 3 + (G.istat.ders || 0) * 4, 0, 100), ip: 'Kitap bul, soruları cevapla, ders ver.' },
+      { ad: 'Sıfır atık', em: '♻️', p: cl(100 * (1 - cop / (G.copBaz * 1.2 || 400)), 0, 100), ip: 'Çöp yığınlarını topla, geri dönüştür (şu an ' + cop + ' yığın).' },
+      { ad: 'Sağlık (sıcak, hastalık)', em: '🩺', p: canli ? cl(sag / canli, 0, 100) : 0, ip: 'Gölge, su, doktor ve serin mesai.' }
+    ];
+  }
+
   function gunluk(ilk) {
     G.gunNo = gun();
     G.sapma = (G.rand() - 0.5) * 6;
@@ -570,6 +593,7 @@ var S = (function () {
     G.balik = Math.min(100, G.balik + 3 + G.doga / 40);
     G.istat.enNufus = Math.max(G.istat.enNufus, B.nufus());
     if (gun() >= 2 && G.rand() < 0.75) { G.soruGun = gun(); G.soruSaat = 9 + Math.floor(G.rand() * 9); }
+    if (gun() % 3 === 1) { var f = U.pick(D.BILGI, G.rand); bildir('💡 ' + f[0] + ' (' + f[1] + ')', 'bilgi'); }
     if (typeof Kayit !== 'undefined') Kayit.kaydet('oto');
   }
 
@@ -591,7 +615,7 @@ var S = (function () {
 
   return {
     gun: gun, saat: saat, mevsim: mevsim, yil: yil, adim: adim, yeniOyun: yeniOyun, bildir: bildir, kart: kart, dogaDegis: dogaDegis,
-    yemekToplam: yemekToplam, yatakSayisi: yatakSayisi, kitapBul: kitapBul, ders: function () { G.moral = Math.min(100, G.moral + 0.4); dogaDegis(0.1); G.istat.ders = (G.istat.ders || 0) + 1; }, gelenKarar: gelenKarar, soruCevap: soruCevap, afetVar: afetVar,
+    karne: karne, yenOran: yen, yemekToplam: yemekToplam, yatakSayisi: yatakSayisi, kitapBul: kitapBul, ders: function () { G.moral = Math.min(100, G.moral + 0.4); dogaDegis(0.1); G.istat.ders = (G.istat.ders || 0) + 1; }, gelenKarar: gelenKarar, soruCevap: soruCevap, afetVar: afetVar,
     hastalan: hastalan, saatlik: saatlik, etkiHesapla: etkiHesapla, HASTALIK: HASTALIK
   };
 })();

@@ -131,7 +131,7 @@ var UI = (function () {
   }
 
   function altKur() {
-    var b = [['insa', '🔨 İnşa (B)'], ['koy', '👥 Köylüler'], ['kitap', '📖 Kitaplar'], ['kural', '📜 Kurallar'], ['bilgi', '💡 Bilgiler'], ['gunluk', '📓 Günlük'], ['menu', '☰ Menü']];
+    var b = [['insa', '🔨 İnşa (B)'], ['koy', '👥 Köylüler'], ['iklim', '🌍 İklim karnesi'], ['kitap', '📖 Kitaplar'], ['kural', '📜 Kurallar'], ['bilgi', '💡 Bilgiler'], ['gunluk', '📓 Günlük'], ['menu', '☰ Menü']];
     var h = '';
     b.forEach(function (a) { h += '<button data-p="' + a[0] + '">' + a[1] + '</button>'; });
     $('alt').innerHTML = h;
@@ -178,6 +178,14 @@ var UI = (function () {
         }
         h += '<small class="' + (u.sag < 40 ? 'kirmizi' : 'gri') + '">Sağlık ' + Math.round(u.sag) + '%' + (u.hasta ? ' · ' + u.hasta.ad : '') + '</small><br><small class="gri">' + durum(u) + '</small></div>';
       });
+    } else if (panel === 'iklim') {
+      var kr = S.karne(), ort = 0; kr.forEach(function (k) { ort += k.p; }); ort = Math.round(ort / kr.length);
+      var ys = Math.round(S.yenOran() * 100);
+      h += '<h3>İklim karnesi <button onclick="UI.panelKapat()">✕</button></h3>';
+      h += '<div class="kart"><b>Küresel sıcaklık: +' + U.f2(G.kuresel) + '°C</b> <small class="gri">(sanayi öncesine göre)</small><div class="bar"><i style="width:' + U.clamp((G.kuresel - 1.5) / 1 * 100, 0, 100) + '%;background:' + (G.kuresel >= 2 ? '#ff5e5e' : '#ffd166') + '"></i></div><small class="gri">1,5°C hedef · 2°C eşik' + (G.kuresel >= 2 ? ' — <span class="kirmizi">AŞILDI</span>' : '') + '. Tek köy küresel iklimi değiştiremez; ama yenilenebilir enerji ve doğa iyileştirmesi artışı yavaşlatır.</small></div>';
+      h += '<div class="kart"><b>Genel iklim puanı: ' + ort + '/100</b> · Yenilenebilir enerji payı: %' + ys + '</div>';
+      h += '<p class="gri" style="font-size:14px">COP31 odak alanları</p>';
+      kr.forEach(function (k) { var c = k.p >= 66 ? '#7bd36b' : (k.p >= 33 ? '#ffd166' : '#ff5e5e'); h += '<div class="kart"><b>' + k.em + ' ' + k.ad + '</b> <small class="gri">' + Math.round(k.p) + '</small><div class="bar"><i style="width:' + k.p + '%;background:' + c + '"></i></div><small class="gri">' + k.ip + '</small></div>'; });
     } else if (panel === 'kitap') {
       h += '<h3>Kitaplar <button onclick="UI.panelKapat()">✕</button></h3><p class="gri" style="font-size:12px">Dedenin Defteri temel bilgileri verir. İleri bilgi, harabelerdeki (kütüphane, okul, evler) eski kitaplardan öğrenilir. Toplayıcılara “Yağmala” emri ver.</p>';
       for (var k2 in D.KITAP) {

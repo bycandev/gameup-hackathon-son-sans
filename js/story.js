@@ -40,7 +40,7 @@ var Hikaye = (function () {
 
   function anaMenu() {
     yaziDurdur(); UI.goster(false);
-    var h = '<div class="orta"><h1>' + U.esc(D.BASLIK) + '</h1><div class="alt">İklim hayatta kalma ve köy kurma · Kestanelik, 2040</div>';
+    var h = '<div class="orta"><h1>' + U.esc(D.BASLIK) + '</h1><div class="alt">İklim hayatta kalma ve köy kurma · Kestanelik, 2040</div><div class="alt" style="font-size:14px;margin-top:-8px">GameUP Türkiye Oyun Hackathonu · COP31 odak alanları: enerji, gıda, dirençli şehirler, okyanus, eğitim, sıfır atık</div>';
     h += '<button class="b ana" id="mYeni">Yeni oyun</button>';
     if (Kayit.enYeni()) h += '<button class="b" id="mDevam">Devam et</button>';
     h += '<button class="b" id="mDosya">Kayıt dosyası yükle</button><button class="b" id="mNasil">Nasıl oynanır</button><button class="b" id="mHak">Hakkında</button></div>';
@@ -174,6 +174,10 @@ var Hikaye = (function () {
     var h = '<div class="orta" style="max-width:640px;max-height:92vh;overflow:auto"><h1>Köyde kimse kalmadı</h1><div class="alt">Ama hikâye burada bitmek zorunda değil.</div>';
     h += '<p style="text-align:left;line-height:1.7">⏳ Dayanılan süre: <b>' + yil + ' yıl ' + g + ' gün</b><br>👥 En yüksek nüfus: <b>' + st.enNufus + '</b><br>🌳 Dikilen fidan: <b>' + st.fidan + '</b><br>🌾 Hasat: <b>' + st.hasat + '</b><br>⚡ Yenilenebilir enerji oranı: <b>' + oran + '</b><br>🤝 Köye alınan insan: <b>' + st.kurtarilan + '</b><br>🌍 Küresel sıcaklık: <b>' + U.f2(G.kuresel) + '°C</b></p>';
     if (st.olumler.length) h += '<p class="gri" style="text-align:left;font-size:12px">Kaybedilenler: ' + st.olumler.map(function (o) { return U.esc(o.ad) + ' (' + o.neden + ')'; }).join(', ') + '</p>';
+    var kr = S.karne(), ort = 0;
+    h += '<div style="text-align:left;margin:10px 0"><b style="color:#ff9f43">İklim karnen</b>';
+    kr.forEach(function (k) { ort += k.p; h += '<div style="font-size:14px;margin-top:4px">' + k.em + ' ' + k.ad + ' <span style="float:right">' + Math.round(k.p) + '</span></div><div class="bar"><i style="width:' + k.p + '%;background:' + (k.p >= 66 ? '#7bd36b' : (k.p >= 33 ? '#ffd166' : '#ff5e5e')) + '"></i></div>'; });
+    h += '<p style="margin-top:6px">Genel puan: <b>' + Math.round(ort / kr.length) + '/100</b></p></div>';
     h += '<p style="margin:12px 0;line-height:1.6">Bu oyundaki her çözüm — rüzgâr enerjisi, yağmur suyu toplama, kompost, erken uyarı, ağaçlandırma — bugün var. <b>2040\'ı beklemek zorunda değiliz.</b></p>';
     h += '<div style="text-align:left;font-size:13px"><b style="color:#ff9f43">Bugün yapabileceklerin</b><ul style="margin:6px 0 10px 18px">' + D.BUGUN.map(function (x) { return '<li>' + U.esc(x) + '</li>'; }).join('') + '</ul></div>';
     h += '<button class="b ana" id="sTekrar">Tekrar dene</button><button class="b" id="sAna">Ana menü</button></div>';
