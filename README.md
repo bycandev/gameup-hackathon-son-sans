@@ -14,8 +14,14 @@ Sol tık seç · Sağ tık emir (kes, topla, yağmala, git, balık, fidan…) ·
 
 Hikâye metinleri `js/story.js` içindeki `METIN` nesnesinde, oyun adı `js/data.js` içindeki `D.BASLIK` alanında.
 
-## Demoda olmayanlar (yol haritası)
-Kervan/takas, radyo ve kasabalar, deprem, hayvan bakımı, atölye üretimi, ses, mobil dokunma, 65 sorunun tamamı (şimdi 25), İngilizce, çevrimiçi mod.
+## Yol haritası
+- **Bilgisayar sürümü:** Web'den çıkıp Windows, Mac ve Linux için masaüstü oyun (Steam).
+- **Daha çok bina ve sistem:** atölye üretim zincirleri, kervan ve radyo, kasaba diplomasisi, deprem, hayvancılık.
+- **Daha kapsamlı oynanış:** teknoloji ağacı, bölgesel iklim senaryoları (Akdeniz, Ege, Karadeniz), uzun soluklu hedefler.
+- **Online mod:** ortak küresel sıcaklık, gerçek oyuncu kasabaları, kervanla takas.
+- **Yapay zekâlı köylü diyalogları** ve dinamik sorular.
+- **Eğitim modu:** okullar için öğretmen paneli ve iklim müfredatı.
+- **İngilizce, mobil, ses ve müzik.**
 
 ## Yayınlama (Coolify)
 Depoyu Coolify'a bağla (Private Repository, GitHub App ya da deploy key) → Build Pack: **Dockerfile** → Port: **80**. `Dockerfile` statik dosyaları nginx ile sunar; derleme adımı yoktur.

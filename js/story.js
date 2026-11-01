@@ -40,7 +40,7 @@ var Hikaye = (function () {
 
   function anaMenu() {
     yaziDurdur(); UI.goster(false);
-    var h = '<div class="orta"><h1>' + U.esc(D.BASLIK) + '</h1><div class="alt">İklim hayatta kalma ve köy kurma · Kestanelik, 2040</div><div class="alt" style="font-size:14px;margin-top:-8px">GameUP Türkiye Oyun Hackathonu · COP31 odak alanları: enerji, gıda, dirençli şehirler, okyanus, eğitim, sıfır atık</div>';
+    var h = '<div class="orta"><img src="logo/son_sans_logo.png" alt="' + U.esc(D.BASLIK) + '" style="width:300px;max-width:80%;image-rendering:pixelated;display:block;margin:0 auto 6px" onerror="this.style.display=&quot;none&quot;"><div class="alt">İklim hayatta kalma ve köy kurma · Kestanelik, 2040</div><div class="alt" style="font-size:14px;margin-top:-8px">GameUP Türkiye Oyun Hackathonu · COP31 odak alanları: enerji, gıda, dirençli şehirler, okyanus, eğitim, sıfır atık</div>';
     h += '<button class="b ana" id="mYeni">Yeni oyun</button>';
     if (Kayit.enYeni()) h += '<button class="b" id="mDevam">Devam et</button>';
     h += '<button class="b" id="mDosya">Kayıt dosyası yükle</button><button class="b" id="mNasil">Nasıl oynanır</button><button class="b" id="mFrag">🎬 Fragman</button><button class="b" id="mHak">Hakkında</button></div>';
