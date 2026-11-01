@@ -39,7 +39,7 @@ select,input[type=text]{font:inherit;background:#1a252d;color:#e8eef2;border:1px
 #ipucu{position:fixed;left:50%;transform:translateX(-50%);top:60px;background:rgba(255,159,67,.96);color:#1b1209;padding:10px 18px;border-radius:8px;font-weight:600;font-size:18px;display:none;z-index:25;max-width:640px;text-align:center}
 #baglam{position:fixed;display:none;background:#1a252d;border:1px solid #ff9f43;border-radius:6px;z-index:40;min-width:140px;overflow:hidden}
 #baglam div{padding:9px 16px;font-size:17px;cursor:pointer}#baglam div:hover{background:#ff9f43;color:#1b1209}
-#modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:50}
+#modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:70}
 .kutu{background:#18232b;border:2px solid #ff9f43;border-radius:12px;padding:20px;max-width:680px;width:92%;max-height:90vh;overflow:auto;box-shadow:0 10px 40px #000a}
 .kutu h2{color:#ff9f43;margin-bottom:10px}
 .kutu p{line-height:1.5;margin-bottom:10px}
