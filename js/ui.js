@@ -22,14 +22,23 @@ var UI = (function () {
 
   // ---------- Modal ----------
   function modalAcik() { return acikModal; }
-  function modalGoster(html) {
-    if (acikModal) { kuyruk.push(html); return; }
-    acikModal = true;
+  var modalCtx = null;
+  // ctx: modal içindeki düğmelerin (data-act) ihtiyaç duyduğu bağlam. Kuyruktaki modallar için de saklanır.
+  function modalGoster(html, ctx) {
+    if (acikModal) { kuyruk.push({ h: html, ctx: ctx }); return; }
+    acikModal = true; modalCtx = ctx || null;
     var m = $('modal'); m.innerHTML = '<div class="kutu">' + html + '</div>'; m.style.display = 'flex';
   }
   function modalKapat() {
-    var m = $('modal'); m.style.display = 'none'; m.innerHTML = ''; acikModal = false;
-    if (kuyruk.length) modalGoster(kuyruk.shift());
+    var m = $('modal'); m.style.display = 'none'; m.innerHTML = ''; acikModal = false; modalCtx = null;
+    if (kuyruk.length) { var n = kuyruk.shift(); modalGoster(n.h, n.ctx); }
+  }
+  function modalTikla(e) {
+    var b = e.target.closest ? e.target.closest('[data-act]') : null;
+    if (!b || !modalCtx) return;
+    var act = b.getAttribute('data-act');
+    if (act === 'soru' && modalCtx.q) soruCevap(+b.getAttribute('data-i'), modalCtx.q);
+    else if (act === 'gelen') { var k = b.getAttribute('data-k'); modalKapat(); S.gelenKarar(k); }
   }
   window.modalKapatGlobal = modalKapat;
 
@@ -62,17 +71,12 @@ var UI = (function () {
     var m = D.MESLEK[kisi.meslek];
     var h = '<div class="portre">' + portre(kisi) + '<div><b>' + U.esc(kisi.ad) + '</b><br><small class="gri">' + (m ? m.ad : '') + '</small></div></div>';
     h += '<p>“' + U.esc(q.soru) + '”</p><div id="soruSec">';
-    for (var i = 0; i < q.sec.length; i++) h += '<button class="sec" data-i="' + i + '">' + U.esc(q.sec[i].t) + '</button>';
+    for (var i = 0; i < q.sec.length; i++) h += '<button class="sec" data-act="soru" data-i="' + i + '">' + U.esc(q.sec[i].t) + '</button>';
     h += '</div>';
-    window.__soru = q;
-    modalGoster(h);
-    setTimeout(function () {
-      var bs = document.querySelectorAll('#soruSec .sec');
-      for (var j = 0; j < bs.length; j++) bs[j].onclick = function () { soruCevap(+this.getAttribute('data-i')); };
-    }, 0);
+    modalGoster(h, { q: q });
   }
-  function soruCevap(i) {
-    var q = window.__soru, r = S.soruCevap(q, i);
+  function soruCevap(i, q) {
+    var r = S.soruCevap(q, i);
     var h = '<h2>Sonuç</h2><p>' + U.esc(r.sonuc) + '</p>';
     var em = etkiMetni(r.e || {});
     if (em) h += '<p class="gri">' + U.esc(em) + '</p>';
@@ -88,12 +92,8 @@ var UI = (function () {
       h += '<div class="portre">' + portre(u) + '<div><b>' + U.esc(q.ad) + '</b> · ' + (q.yas === 'cocuk' ? 'çocuk' : q.yas === 'yasli' ? 'yaşlı' : 'yetişkin') + '<br><small class="gri">Söylediği meslek: ' + D.MESLEK[q.meslek].ad + (q.hasta ? ' · <span class="kirmizi">öksürüyor</span>' : '') + '</small></div></div>';
     }
     h += '<p class="gri">Boş yatak: ' + Math.max(0, S.yatakSayisi() - B.nufus()) + '</p>';
-    h += '<button class="sec ana" id="g1">Kabul et</button><button class="sec" id="g2">Karantinayla kabul et</button><button class="sec" id="g3">Reddet</button>';
-    modalGoster(h);
-    setTimeout(function () {
-      var f = function (k) { return function () { S.gelenKarar(k); modalKapat(); }; };
-      $('g1').onclick = f('kabul'); $('g2').onclick = f('karantina'); $('g3').onclick = f('ret');
-    }, 0);
+    h += '<button class="sec ana" data-act="gelen" data-k="kabul">Kabul et</button><button class="sec" data-act="gelen" data-k="karantina">Karantinayla kabul et</button><button class="sec" data-act="gelen" data-k="ret">Reddet</button>';
+    modalGoster(h, { gelen: g });
   }
 
   // ---------- Üst çubuk ----------
@@ -574,6 +574,8 @@ var UI = (function () {
   var sayac = 0;
   function ciz() {
     if (!G) return;
+    // Cevap bekleyen gelenler varsa ama kart görünmüyorsa (kayıttan yükleme vb.) yeniden göster; oyun bekleyerek donmasın
+    if (G.gelen && !acikModal && !kuyruk.length) yeniGelenGoster(G.gelen);
     ustYenile();
     secimYenile(false);
     if (panel) panelCiz(false);
@@ -588,7 +590,7 @@ var UI = (function () {
     if (!a) { $('secim').style.display = 'none'; $('panel').style.display = 'none'; $('ipucu').style.display = 'none'; panel = null; yapimKod = null; R.setHayalet(null); }
   }
 
-  function init() { altKur(); girdiKur(); }
+  function init() { altKur(); girdiKur(); $('modal').addEventListener('click', modalTikla); }
 
   return {
     init: init, ciz: ciz, goster: goster, toast: toast, bilgiKarti: bilgiKarti, soruGoster: soruGoster, yeniGelenGoster: yeniGelenGoster,
