@@ -2,7 +2,7 @@
 
 > **Bu dosya kimin için?** CAN ve Claude Code için. Projeyle ilgili kararlaştırılmış ve henüz karar verilmemiş her şey burada. Claude Code'a bu dosyayı verip "Bu tasarıma göre devam et" demek yeterli olmalı.
 >
-> **Durum tarihi:** 1 Kasım 2026, 00:30 · **Oyunun adı:** henüz yok (`D.BASLIK = 'İSİM YAKINDA'`)
+> **Durum tarihi:** 1 Kasım 2026, 00:30 · **Oyunun adı:** Son Şans (`D.BASLIK = 'SON ŞANS'`)
 
 ---
 
@@ -66,7 +66,7 @@
 | 12 | “Doğa düşman” fikri | Hackathon ve COP31 konularına uyduğu sürece serbest. Mekaniği: **Doğa Dengesi** göstergesi. |
 | 13 | Süre ve kayıt | Kaybedene kadar sürer. Elle kayıt + her gün sonunda otomatik kayıt; menüden “Devam et”. |
 | 14 | Ana karakter | Oyuncunun kendisi: adını ve cinsiyetini kendisi seçer |
-| 15 | Ad | Henüz yok, en son konacak |
+| 15 | Ad | Son Şans |
 | 16 | Dil | Yalnızca Türkçe |
 | 17 | Ekip bilgisi | Sonra eklenecek (kim ne yaptı) |
 | 18 | Zorluk adları | **Filiz** (kolay) · **Fırtına** (orta) · **Kıyamet** (zor) |
@@ -572,7 +572,7 @@ oyun/
 
 | # | Soru | Önerim |
 | --- | --- | --- |
-| 1 | Oyunun adı | Aday: “Sığınaktan Sonra”, “Yeniden Filiz”, “Kestanelik 2040”, “Uzun Yaz”, “Yeşil Sinyal” |
+| 1 | Oyunun adı | **Karar verildi: Son Şans** (diğer adaylar: “Sığınaktan Sonra”, “Yeniden Filiz”, “Kestanelik 2040”) |
 | 2 | Ekip adları ve rolleri (sunum ve Hakkında ekranı) | CAN dolduracak |
 | 3 | 1x hızda bir günün kaç gerçek dakika süreceği | 4 dk (1 mevsim ≈ 28 dk, 1 yıl ≈ 2 saat) |
 | 4 | Sığınaktan kaç kişi çıkıyor? | Oyuncu + 2 (şu anki kod) |
